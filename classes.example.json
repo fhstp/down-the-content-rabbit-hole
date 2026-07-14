@@ -1,0 +1,12 @@
+{
+  "Animal": {
+    "definition": "Videos featuring real animals such as pets, wildlife or livestock.",
+    "include": "cats, dogs, wild animals, farm animals, veterinary care",
+    "exclude": "animated animals, animal logos, humans in costumes"
+  },
+  "Car": {
+    "definition": "Videos featuring cars, driving or car culture.",
+    "include": "car reviews, driving footage, car meets, engines, detailing",
+    "exclude": "video game cars, toy cars, motorcycles"
+  }
+}

@@ -1,0 +1,16 @@
+# Core ML
+torch==2.11.0
+torchvision==0.26.0
+
+# Video / image
+decord==0.6.0
+pillow==12.1.1
+numpy==2.2.6
+
+# CLIP pipeline (classify_clip.py, tune_clip_hyperparams.py)
+clip @ git+https://github.com/openai/CLIP.git
+requests==2.32.3
+
+# UI
+tqdm==4.67.3
+rich==14.3.3

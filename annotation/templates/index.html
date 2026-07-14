@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Annotation Tool</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .annotator-info {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .annotator-info strong {
+            color: var(--text);
+        }
+
+        .btn-logout {
+            padding: 0.4rem 0.875rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .btn-logout:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+            border-color: var(--text-muted);
+        }
+
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-value.success { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: var(--bg-hover);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .main-content {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .video-section {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            aspect-ratio: 9/16;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-container video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .video-info {
+            padding: 1.5rem;
+        }
+
+        .video-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .video-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .video-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .annotation-panel {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .annotation-progress-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.625rem;
+            border-radius: 1rem;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            white-space: nowrap;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .checkbox-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .checkbox-item.checked {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: auto;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .no-video {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 400px;
+            color: var(--text-muted);
+        }
+
+        .no-video svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Settings Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .label-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .label-input {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .label-input input {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+
+        .label-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .label-input .btn-remove {
+            padding: 0.75rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        /* Edit Panel */
+        .edit-panel {
+            display: none;
+        }
+
+        .edit-panel.active {
+            display: block;
+        }
+
+        .annotate-panel {
+            display: block;
+        }
+
+        .annotate-panel.hidden {
+            display: none;
+        }
+
+        .edit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+
+        .edit-item {
+            background: var(--bg-card);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .edit-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .edit-item-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .edit-item-channel {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .edit-item-annotations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .annotation-tag {
+            padding: 0.25rem 0.75rem;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .annotation-tag.none {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--success);
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #a855f7);
+            transition: width 0.3s;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .annotation-panel {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .stats {
+                gap: 1rem;
+            }
+            
+            .video-section {
+                width: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Video Annotation Tool</h1>
+            <div class="header-right">
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value success" id="stat-fully-done">0</div>
+                        <div class="stat-label">Complete</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value warning" id="stat-partial">0</div>
+                        <div class="stat-label">Partial</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-remaining">0</div>
+                        <div class="stat-label">Remaining</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-total">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; border-left: 1px solid var(--border); padding-left: 1.5rem;">
+                    <span class="annotator-info">Signed in as <strong>{{ annotator_name }}</strong></span>
+                    <a href="/logout" class="btn-logout">Sign out</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="annotate">Annotate</button>
+            <button class="tab" data-tab="edit">My Annotations</button>
+            <button class="tab" data-tab="settings">Settings</button>
+        </div>
+
+        <!-- Annotate Panel -->
+        <div class="annotate-panel" id="annotate-panel">
+            <div class="main-content">
+                <div class="video-section">
+                    <div class="video-container" id="video-container">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                    <div class="video-info" id="video-info">
+                        <div class="video-title" id="video-title">Loading...</div>
+                        <div class="video-meta">
+                            <span id="video-channel">-</span>
+                            <span id="video-views">-</span>
+                            <span id="video-duration">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="annotation-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Annotations</span>
+                        <span class="annotation-progress-badge" id="annotation-progress" style="display:none;"></span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.8125rem; margin-bottom: 1rem;">Select all that apply, or leave empty if none apply.</p>
+                    <div class="checkbox-group" id="checkbox-group">
+                        <!-- Checkboxes populated by JS -->
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-secondary" id="btn-skip">Skip</button>
+                        <button class="btn btn-primary" id="btn-annotate">
+                            &#10003; Annotate &amp; Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Edit Panel -->
+        <div class="edit-panel" id="edit-panel">
+            <div class="edit-list" id="edit-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="edit-panel" id="settings-panel">
+            <div class="modal" style="max-width: 100%; border: none; padding: 0;">
+                <h2>Configure Annotation Labels</h2>
+                <div id="labels-container">
+                    <!-- Labels populated by JS -->
+                </div>
+                <button class="btn btn-secondary" id="btn-add-label" style="margin-top: 1rem;">+ Add Label</button>
+                <button class="btn btn-primary" id="btn-save-labels" style="margin-top: 1rem; width: 100%;">Save Labels</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Saved!</div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal" style="max-width: 700px; width: 95%;">
+            <h2>Edit My Annotation</h2>
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                <div style="flex-shrink: 0;">
+                    <div class="modal-video-container" id="modal-video-container" style="margin-bottom: 0.5rem; border-radius: 0.75rem; overflow: hidden; background: #000; aspect-ratio: 9/16; width: 200px;">
+                        <!-- Video inserted by JS -->
+                    </div>
+                    <div class="video-title" id="modal-video-title" style="font-size: 0.875rem; max-width: 200px;"></div>
+                    <div class="video-meta" id="modal-video-meta" style="color: var(--text-muted); font-size: 0.75rem; max-width: 200px;"></div>
+                </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <div class="checkbox-group" id="modal-checkbox-group" style="max-height: 350px;">
+                        <!-- Checkboxes populated by JS -->
+                    </div>
+                    <div class="actions" style="margin-top: 1rem;">
+                        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                        <button class="btn btn-primary" id="modal-save">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Annotator identity comes from the server session (set at login).
+        // No client-side session ID needed.
+
+        // State
+        let currentVideo = null;
+        let currentAnnotationNumber = 1;
+        let currentTargetAnnotations = 2;
+        let labels = {{ default_labels | tojson }};
+        let statsData = { total: 0, fully_done: 0, partial: 0, remaining: 0 };
+
+        // DOM Elements
+        const videoContainer = document.getElementById('video-container');
+        const videoTitle = document.getElementById('video-title');
+        const videoChannel = document.getElementById('video-channel');
+        const videoViews = document.getElementById('video-views');
+        const videoDuration = document.getElementById('video-duration');
+        const checkboxGroup = document.getElementById('checkbox-group');
+        const btnAnnotate = document.getElementById('btn-annotate');
+        const btnSkip = document.getElementById('btn-skip');
+        const toast = document.getElementById('toast');
+        const progressFill = document.getElementById('progress-fill');
+        const annotationProgressBadge = document.getElementById('annotation-progress');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCheckboxes();
+            loadNextVideo();
+            loadStats();
+            setupTabs();
+            setupSettings();
+        });
+
+        // Tab switching
+        function setupTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    const tabName = tab.dataset.tab;
+                    document.getElementById('annotate-panel').classList.toggle('hidden', tabName !== 'annotate');
+                    document.getElementById('edit-panel').classList.toggle('active', tabName === 'edit');
+                    document.getElementById('settings-panel').classList.toggle('active', tabName === 'settings');
+
+                    if (tabName === 'edit') {
+                        loadEditList();
+                    }
+                });
+            });
+        }
+
+        // Render checkboxes for a given container
+        function renderCheckboxes(containerId = 'checkbox-group') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = labels.map((label, i) => `
+                <div class="checkbox-item" onclick="toggleCheckbox(this)">
+                    <input type="checkbox" id="${containerId}-label-${i}" value="${label}">
+                    <label for="${containerId}-label-${i}">${label}</label>
+                </div>
+            `).join('');
+        }
+
+        function toggleCheckbox(item) {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            item.classList.toggle('checked', checkbox.checked);
+        }
+
+        // Load next video
+        async function loadNextVideo() {
+            videoContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            annotationProgressBadge.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/next-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentVideo = data.video;
+                    currentAnnotationNumber = data.annotation_number;
+                    currentTargetAnnotations = data.target_annotations;
+                    renderVideo(currentVideo);
+                    updateAnnotationProgressBadge();
+                } else {
+                    videoContainer.innerHTML = `
+                        <div class="no-video">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3>All Done!</h3>
+                            <p>No more videos to annotate.</p>
+                        </div>
+                    `;
+                    videoTitle.textContent = 'No more videos';
+                    videoChannel.textContent = '-';
+                    videoViews.textContent = '-';
+                    videoDuration.textContent = '-';
+                    annotationProgressBadge.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Error loading video:', err);
+                videoContainer.innerHTML = '<div class="no-video"><p>Error loading video</p></div>';
+            }
+        }
+
+        function updateAnnotationProgressBadge() {
+            if (currentVideo && currentTargetAnnotations > 1) {
+                annotationProgressBadge.textContent =
+                    `Annotation ${currentAnnotationNumber} of ${currentTargetAnnotations}`;
+                annotationProgressBadge.style.display = '';
+            } else {
+                annotationProgressBadge.style.display = 'none';
+            }
+        }
+
+        // Render video player and metadata
+        function renderVideo(video) {
+            videoContainer.innerHTML = `
+                <video controls autoplay>
+                    <source src="/video/${video.video_id}.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+
+            videoTitle.textContent = video.title;
+            videoChannel.textContent = `\u{1F4FA} ${video.channel_title}`;
+            videoViews.textContent = `\u{1F441}\uFE0F ${parseInt(video.view_count).toLocaleString()}`;
+            videoDuration.textContent = `\u23F1\uFE0F ${formatDuration(video.duration)}`;
+
+            // Reset checkboxes
+            document.querySelectorAll('#checkbox-group .checkbox-item').forEach(item => {
+                item.classList.remove('checked');
+                item.querySelector('input').checked = false;
+            });
+        }
+
+        // Format ISO 8601 duration
+        function formatDuration(duration) {
+            if (!duration) return '-';
+            const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+            if (!match) return duration;
+
+            const hours   = match[1] ? parseInt(match[1]) : 0;
+            const minutes = match[2] ? parseInt(match[2]) : 0;
+            const seconds = match[3] ? parseInt(match[3]) : 0;
+
+            if (hours > 0) {
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Get selected annotations from a checkbox container
+        function getSelectedAnnotations(containerId = 'checkbox-group') {
+            const checkboxes = document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`);
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // Annotate video
+        btnAnnotate.addEventListener('click', async () => {
+            if (!currentVideo) return;
+
+            const annotations = getSelectedAnnotations();
+
+            try {
+                const res = await fetch('/api/annotate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        video_id: currentVideo.video_id,
+                        annotations: annotations
+                    })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    if (result.escalated) {
+                        showToast('Target raised to 3 annotations per video!', false, 3500);
+                    } else {
+                        showToast('Annotation saved!');
+                    }
+                    loadStats();
+                    loadNextVideo();
+                } else {
+                    showToast(result.message || 'Error saving annotation', true);
+                    loadNextVideo();
+                }
+            } catch (err) {
+                console.error('Error saving annotation:', err);
+                showToast('Error saving annotation', true);
+            }
+        });
+
+        // Skip video
+        btnSkip.addEventListener('click', async () => {
+            if (!currentVideo) return;
+
+            try {
+                await fetch('/api/skip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ video_id: currentVideo.video_id })
+                });
+                loadNextVideo();
+            } catch (err) {
+                console.error('Error skipping:', err);
+            }
+        });
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                statsData = await res.json();
+
+                document.getElementById('stat-fully-done').textContent = statsData.fully_done;
+                document.getElementById('stat-partial').textContent    = statsData.partial;
+                document.getElementById('stat-remaining').textContent  = statsData.remaining;
+                document.getElementById('stat-total').textContent      = statsData.total;
+
+                const progress = statsData.total > 0
+                    ? (statsData.fully_done / statsData.total) * 100
+                    : 0;
+                progressFill.style.width = `${progress}%`;
+            } catch (err) {
+                console.error('Error loading stats:', err);
+            }
+        }
+
+        // Toast notification
+        function showToast(message, isError = false, duration = 2000) {
+            toast.textContent = message;
+            toast.style.background = isError ? '#ef4444' : '#10b981';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        // Edit list — shows only this user's annotations (server filters by session)
+        async function loadEditList() {
+            const editList = document.getElementById('edit-list');
+            editList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                const res = await fetch('/api/all-annotations');
+                const videos = await res.json();
+
+                if (videos.length === 0) {
+                    editList.innerHTML = '<div class="no-video"><p>You have not annotated any videos yet.</p></div>';
+                    return;
+                }
+
+                editList.innerHTML = videos.map(video => {
+                    const entry = video.my_entry || {};
+                    const annots = entry.annotations || [];
+                    return `
+                        <div class="edit-item" data-video-id="${video.video_id}">
+                            <div class="edit-item-header">
+                                <div>
+                                    <div class="edit-item-title">${video.title}</div>
+                                    <div class="edit-item-channel">${video.channel_title}</div>
+                                </div>
+                                <button class="btn btn-secondary" onclick="openEditModal('${video.video_id}')">Edit</button>
+                            </div>
+                            <div class="edit-item-annotations">
+                                ${annots.length > 0
+                                    ? annots.map(a => `<span class="annotation-tag">${a}</span>`).join('')
+                                    : '<span class="annotation-tag none">No issues found</span>'
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Error loading edit list:', err);
+                editList.innerHTML = '<div class="no-video"><p>Error loading annotations</p></div>';
+            }
+        }
+
+        // Edit modal
+        let editingVideoId = null;
+
+        async function openEditModal(videoId) {
+            editingVideoId = videoId;
+
+            const res = await fetch('/api/all-annotations');
+            const videos = await res.json();
+            const video = videos.find(v => v.video_id === videoId);
+
+            if (!video) return;
+
+            document.getElementById('modal-video-title').textContent = video.title;
+            document.getElementById('modal-video-meta').innerHTML =
+                `\u{1F4FA} ${video.channel_title}<br>\u{1F441}\uFE0F ${parseInt(video.view_count).toLocaleString()} \u00B7 \u23F1\uFE0F ${formatDuration(video.duration)}`;
+
+            const modalVideoContainer = document.getElementById('modal-video-container');
+            modalVideoContainer.innerHTML = `
+                <video controls style="width: 100%; height: 100%; object-fit: contain;">
+                    <source src="/video/${video.video_id}.mp4" type="video/mp4">
+                </video>
+            `;
+
+            renderCheckboxes('modal-checkbox-group');
+
+            // Pre-tick this user's annotations
+            const currentAnnotations = (video.my_entry && video.my_entry.annotations) || [];
+            document.querySelectorAll('#modal-checkbox-group .checkbox-item').forEach(item => {
+                const checkbox = item.querySelector('input');
+                if (currentAnnotations.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                    item.classList.add('checked');
+                }
+            });
+
+            document.getElementById('edit-modal').classList.add('active');
+        }
+
+        document.getElementById('modal-cancel').addEventListener('click', () => {
+            stopModalVideo();
+            document.getElementById('edit-modal').classList.remove('active');
+            editingVideoId = null;
+        });
+
+        document.getElementById('modal-save').addEventListener('click', async () => {
+            if (!editingVideoId) return;
+
+            const annotations = getSelectedAnnotations('modal-checkbox-group');
+
+            try {
+                const res = await fetch('/api/update-annotation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        video_id: editingVideoId,
+                        annotations: annotations
+                    })
+                });
+
+                if (res.ok) {
+                    showToast('Annotation updated!');
+                    stopModalVideo();
+                    document.getElementById('edit-modal').classList.remove('active');
+                    loadEditList();
+                    loadStats();
+                }
+            } catch (err) {
+                console.error('Error updating annotation:', err);
+                showToast('Error updating annotation', true);
+            }
+        });
+
+        function stopModalVideo() {
+            const v = document.querySelector('#modal-video-container video');
+            if (v) { v.pause(); v.currentTime = 0; }
+        }
+
+        // Settings
+        function setupSettings() {
+            renderLabelsSettings();
+
+            document.getElementById('btn-add-label').addEventListener('click', () => {
+                labels.push('New Label');
+                renderLabelsSettings();
+            });
+
+            document.getElementById('btn-save-labels').addEventListener('click', async () => {
+                const inputs = document.querySelectorAll('#labels-container input');
+                labels = Array.from(inputs).map(i => i.value).filter(v => v.trim());
+
+                try {
+                    await fetch('/api/labels', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ labels })
+                    });
+                    renderCheckboxes();
+                    showToast('Labels saved!');
+                } catch (err) {
+                    console.error('Error saving labels:', err);
+                    showToast('Error saving labels', true);
+                }
+            });
+        }
+
+        function renderLabelsSettings() {
+            const container = document.getElementById('labels-container');
+            container.innerHTML = labels.map((label, i) => `
+                <div class="label-input-group">
+                    <div class="label-input">
+                        <input type="text" value="${label}" placeholder="Label name">
+                        <button class="btn-remove" onclick="removeLabel(${i})">&#215;</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeLabel(index) {
+            labels.splice(index, 1);
+            renderLabelsSettings();
+        }
+
+        // Close modal on overlay click
+        document.getElementById('edit-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'edit-modal') {
+                stopModalVideo();
+                document.getElementById('edit-modal').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
