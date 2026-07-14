@@ -212,7 +212,7 @@ If you use this code or build on the pipeline, please cite this repository and t
 ```bibtex
 @misc{kietreiber2026rabbithole,
   title        = {Down the Content Rabbit Hole: Making Algorithmic Content Shift on Short-Form Video Platforms Measurable},
-  author       = {Kietreiber, Tobias and Krejca, Felix and Neubacher, Anna and Neumair, Sebastian and Klausner, Lukas-Daniel},
+  author       = {Kietreiber, Tobias and Krejca, Felix and Neubacher, Anna and Neumaier, Sebastian and Klausner, Lukas-Daniel},
   year         = {2026},
   howpublished = {\url{https://github.com/fhstp/down-the-content-rabbit-hole}},
   note         = {Code repository. Presented at the International Conference on Social Media \& Society (SMS 2026)},
