@@ -1,6 +1,6 @@
 # Down the Content Rabbit Hole: Making Algorithmic Content Shift on Short-Form Video Platforms Measurable
 
-Code accompanying the *Down the Content Rabbit Hole* paper. The repository covers the full pipeline:
+Code accompanying the *Down the Content Rabbit Hole* paper as presented at the Internatial Conference on Social Media & Society (SMS 2026). The repository covers the full pipeline:
 
 1. **Scraping** YouTube Shorts via the YouTube Data API + `yt-dlp`
 2. **Annotating** videos through a multi-annotator Flask web app
